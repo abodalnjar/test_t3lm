@@ -1,0 +1,79 @@
+name: flutter_app_template
+repository: https://github.com/altive/flutter_app_template
+
+packages:
+  - packages/**
+
+scripts:
+  upgrade:
+    run: |
+      melos exec -- \
+        "flutter pub upgrade --major-versions && flutter pub upgrade"
+    description: Upgrade the major version of the pub in all packages
+    select-packages:
+      flutter: true
+      dir-exists: lib
+
+  analyze:
+    run: |
+      melos exec --dir-exists="lib" -- \
+        flutter analyze . --fatal-infos
+    description: Analyze in all packages
+
+  format:
+    run: |
+      melos exec --dir-exists="lib" -- \
+        flutter format --dry-run --set-exit-if-changed lib/
+    description: Format in all packages
+
+  test:
+    run: |
+      melos exec --dir-exists="test" --fail-fast -- \
+        flutter test --coverage
+    description: flutter test in all packages
+
+  gen:
+    run: |
+      melos exec -c 1 -- \
+        flutter pub run build_runner build --delete-conflicting-outputs
+    description: Generate code files
+    select-package:
+      dir-exists: lib
+      depends-on: "build_runner"
+
+  fix:
+    run: |
+      melos exec -- \
+        dart fix --apply lib
+    description: Dart fix
+    select-packages:
+      dir-exists: lib
+
+  # Upload
+  upload:ios:prod:
+    run: |
+      melos exec -c 1 --depends-on="build_runner" --flutter -- \
+        flutter build ipa --dart-define=FLAVOR=prod --export-options-plist="ios/prod/ExportOptions.plist"
+    select-package:
+      dir-exists: lib
+
+  upload:ios:prod:restock:
+    run: |
+      melos exec -c 1 --scope="restock" --flutter --private -- \
+        flutter build ipa --flavor production --dart-define=FLAVOR=production --export-options-plist="ios/prod/ExportOptions.plist --no-tree-shake-icons"
+
+  # use fastlane
+  submit:all:restock:
+    run: |
+      melos run submit:ios:restock
+      melos run submit:android:restock
+      
+  submit:ios:restock:
+    run: |
+      melos exec -c 1 --scope="restock" --flutter --private -- \
+        "cd ios && rbenv exec bundle update && rbenv exec bundle install && bundle exec fastlane submit"
+
+  submit:android:restock:
+    run: |
+      melos exec -c 1 --scope="restock" --flutter --private -- \
+        "cd android && rbenv exec bundle update && rbenv exec bundle install && bundle exec fastlane submit"
