@@ -10,7 +10,7 @@ environment:
 dependencies:
   cached_network_image: ^3.2.0
   collection: ^1.16.0
-  ferry: ^0.10.4
+  ferry: ^0.11.2+1
   flutter:
     sdk: flutter
   flutter_dotenv: ^5.0.2
@@ -23,7 +23,7 @@ dependencies:
 dev_dependencies:
   altive_lints: ^1.0.0
   build_runner: ^2.1.10
-  ferry_generator: ^0.5.0-dev.10
+  ferry_generator: ^0.6.1
   flutter_test:
     sdk: flutter
   freezed: ^2.0.2
